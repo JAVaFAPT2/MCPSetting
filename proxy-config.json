@@ -1,0 +1,30 @@
+{
+  "3001": {
+    "target": "localhost:3001",
+    "description": "Sequential Thinking Proxy"
+  },
+  "3002": {
+    "target": "localhost:3002",
+    "description": "Puppeteer Proxy"
+  },
+  "3003": {
+    "target": "localhost:3003",
+    "description": "Memory Bank Proxy"
+  },
+  "3004": {
+    "target": "localhost:3004",
+    "description": "Playwright Proxy"
+  },
+  "3005": {
+    "target": "localhost:3005",
+    "description": "GitHub Proxy"
+  },
+  "3006": {
+    "target": "localhost:3006",
+    "description": "Knowledge Graph Proxy"
+  },
+  "3007": {
+    "target": "localhost:3007",
+    "description": "MCP Compass Proxy"
+  }
+}

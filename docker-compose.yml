@@ -1,55 +1,27 @@
+version: '3.8'
+
 services:
-  sequentialthinking:
-    image: node:20
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm install git+https://github.com/<org>/protocol-server-sequentialthinking.git && npx @modelcontext/protocol-server-sequentialthinking"
+  mcp-servers:
+    build: .
     ports:
-      - "3001:3001"
-
-  puppeteer:
-    image: node:20
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm install git+https://github.com/<org>/protocol-server-puppeteer.git && npx @modelcontext/protocol-server-puppeteer"
-    ports:
-      - "3002:3002"
-
-  memorybank:
-    image: node:20
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm install git+https://github.com/<org>/memory-bank-mcp.git && npx @alioshr/memory-bank-mcp"
+      - "3000:3000"  # Main HTTP server
+      - "3001:3001"  # Sequential Thinking TCP proxy
+      - "3002:3002"  # Puppeteer TCP proxy
+      - "3003:3003"  # Memory Bank TCP proxy
+      - "3004:3004"  # Playwright TCP proxy
+      - "3005:3005"  # GitHub TCP proxy
+      - "3006:3006"  # Knowledge Graph TCP proxy
+      - "3007:3007"  # MCP Compass TCP proxy
     environment:
-      - MEMORY_BANK_ROOT=/data
+      - NODE_ENV=production
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
     volumes:
-      - ./memory-bank:/data
-    ports:
-      - "3003:3003"
-
-  playwright:
-    image: mcr.microsoft.com/playwright:v1.48.0-jammy
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm cache clean --force && npm install @playwright/test && npx playwright install && npx -y git+https://github.com/<org>/protocol-server-playwright.git"
-    ports:
-      - "3004:8931"
-
-  githubmcp:
-    image: node:20
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm install git+https://github.com/<org>/protocol-server-github.git && npx @modelcontext/protocol-server-github"
-    environment:
-      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
-    ports:
-      - "3005:3005"
-
-  knowledgegraph:
-    image: node:20
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm install git+https://github.com/<org>/protocol-server-memory.git && npx @modelcontext/protocol-server-memory"
-    ports:
-      - "3006:3006"
-
-  mcpcompass:
-    image: node:20
-    command: >
-      /bin/bash -c "npm install -g npm@11.4.2 && npm install git+https://github.com/<org>/mcp-compass.git && npx @liuyoshio/mcp-compass"
-    ports:
-      - "3007:3007"
+      - ./logs:/app/logs
+      - ./proxy-config.json:/app/proxy-config.json
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

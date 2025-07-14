@@ -31,8 +31,9 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p /tmp/memory-bank
 
-# Expose port
+# Expose ports
 EXPOSE 3000
+EXPOSE 3001-3007
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

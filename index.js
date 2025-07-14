@@ -3,6 +3,7 @@ const cors = require('cors');
 const { spawn } = require('child_process');
 const fs = require('fs-extra');
 const path = require('path');
+const TCPProxy = require('./tcp-proxy');
 require('dotenv').config();
 
 const app = express();
@@ -24,7 +25,8 @@ app.get('/health', (req, res) => {
       'playwright',
       'github',
       'knowledge-graph',
-      'mcp-compass'
+      'mcp-compass',
+      'tcp-proxy'
     ]
   });
 });
@@ -41,7 +43,8 @@ app.get('/', (req, res) => {
       'playwright': '/playwright',
       'github': '/github',
       'knowledge-graph': '/knowledge-graph',
-      'mcp-compass': '/mcp-compass'
+      'mcp-compass': '/mcp-compass',
+      'tcp-proxy': '/tcp-proxy'
     },
     health: '/health'
   });
@@ -104,6 +107,84 @@ app.get('/mcp-compass', (req, res) => {
   });
 });
 
+// TCP Proxy endpoints
+app.get('/tcp-proxy', (req, res) => {
+  res.json({
+    service: 'tcp-proxy',
+    status: 'running',
+    description: 'TCP Proxy for MCP servers',
+    endpoints: {
+      'status': '/tcp-proxy/status',
+      'add': '/tcp-proxy/add',
+      'remove': '/tcp-proxy/remove',
+      'list': '/tcp-proxy/list'
+    }
+  });
+});
+
+app.get('/tcp-proxy/status', (req, res) => {
+  res.json({
+    service: 'tcp-proxy',
+    status: 'running',
+    proxies: tcpProxy.getStatus()
+  });
+});
+
+app.get('/tcp-proxy/list', (req, res) => {
+  res.json({
+    service: 'tcp-proxy',
+    proxies: tcpProxy.getProxies()
+  });
+});
+
+app.post('/tcp-proxy/add', express.json(), (req, res) => {
+  const { port, target, description } = req.body;
+  
+  if (!port || !target) {
+    return res.status(400).json({
+      error: 'Port and target are required',
+      example: {
+        port: 8080,
+        target: 'localhost:3000',
+        description: 'Optional description'
+      }
+    });
+  }
+
+  tcpProxy.addProxy(port, target, description);
+  res.json({
+    success: true,
+    message: `Added proxy ${port} -> ${target}`,
+    proxy: { port, target, description }
+  });
+});
+
+app.delete('/tcp-proxy/remove', express.json(), (req, res) => {
+  const { port } = req.body;
+  
+  if (!port) {
+    return res.status(400).json({
+      error: 'Port is required',
+      example: { port: 8080 }
+    });
+  }
+
+  const removed = tcpProxy.removeProxy(port);
+  if (removed) {
+    res.json({
+      success: true,
+      message: `Removed proxy on port ${port}`
+    });
+  } else {
+    res.status(404).json({
+      error: `No proxy found on port ${port}`
+    });
+  }
+});
+
+// Initialize TCP Proxy
+const tcpProxy = new TCPProxy();
+
 // Create necessary directories
 const createDirectories = async () => {
   try {
@@ -120,6 +201,9 @@ const initialize = async () => {
   console.log('🚀 Initializing MCP Servers...');
   await createDirectories();
   
+  // Start TCP proxies
+  tcpProxy.startProxies();
+  
   // Start the main server
   app.listen(PORT, () => {
     console.log(`🚀 MCP Servers running on port ${PORT}`);
@@ -134,6 +218,7 @@ const initialize = async () => {
     console.log('  • GitHub: /github');
     console.log('  • Knowledge Graph: /knowledge-graph');
     console.log('  • MCP Compass: /mcp-compass');
+    console.log('  • TCP Proxy: /tcp-proxy');
   });
 };
 
