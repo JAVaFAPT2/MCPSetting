@@ -1,0 +1,40 @@
+{
+  "name": "mcp-servers",
+  "version": "1.0.0",
+  "description": "MCP Servers for Claude AI - Deployed on Railway",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build": "echo 'Build completed'",
+    "test": "echo 'No tests specified'"
+  },
+  "dependencies": {
+    "@modelcontext/protocol-server-sequentialthinking": "latest",
+    "@modelcontext/protocol-server-puppeteer": "latest",
+    "@alioshr/memory-bank-mcp": "latest",
+    "@playwright/test": "^1.48.0",
+    "@modelcontext/protocol-server-playwright": "latest",
+    "@modelcontext/protocol-server-github": "latest",
+    "@modelcontext/protocol-server-memory": "latest",
+    "@liuyoshio/mcp-compass": "latest",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "ai",
+    "servers",
+    "railway"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+} 
